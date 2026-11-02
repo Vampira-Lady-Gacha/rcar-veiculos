@@ -1,0 +1,2 @@
+User-agent: *
+Sitemap: https://vampira-lady-gacha.github.io/rcar-veiculos/sitemap.xml
