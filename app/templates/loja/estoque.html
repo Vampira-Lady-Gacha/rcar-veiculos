@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "_macros.html" import carro %}
+
+{% block titulo %}Estoque · {{ loja.nome_loja }}{% endblock %}
+{% block descricao %}Carros disponíveis na {{ loja.nome_loja }} em {{ loja.cidade }}, com fotos, ano, quilometragem e preço. Financiamento por 8 bancos.{% endblock %}
+
+{% block conteudo %}
+<section class="block" style="padding-top:56px">
+  <div class="wrap">
+    <div class="head">
+      <h1 class="cromo">Estoque</h1>
+      <p>Todos os carros no salão hoje. Reservados ainda podem ser vistos, mas já têm comprador encaminhado.</p>
+    </div>
+
+    {% if veiculos %}
+    <form class="filtros" data-filtros role="search" onsubmit="return false">
+      <label class="busca">Buscar<input type="search" data-filtro="busca" placeholder="Modelo, versão, cor ou ano"></label>
+      {% if marcas | length > 1 %}
+      <label>Marca<select data-filtro="marca"><option value="">Todas</option>{% for m in marcas %}<option>{{ m }}</option>{% endfor %}</select></label>
+      {% endif %}
+      {% if cambios | length > 1 %}
+      <label>Câmbio<select data-filtro="cambio"><option value="">Todos</option>{% for c in cambios %}<option>{{ c }}</option>{% endfor %}</select></label>
+      {% endif %}
+      <label>Ordem<select data-filtro="ordem">
+        <option value="">Destaques</option>
+        <option value="menor-preco">Menor preço</option>
+        <option value="maior-preco">Maior preço</option>
+        <option value="mais-novo">Mais novo</option>
+        <option value="menor-km">Menor km</option>
+      </select></label>
+      <span class="contagem" data-contagem aria-live="polite">{{ veiculos | length }} carro{{ 's' if veiculos | length != 1 }}</span>
+    </form>
+    <div class="carros" data-lista>
+      {% for v in veiculos %}{{ carro(v, loop.index0, lazy=not loop.first) }}{% endfor %}
+    </div>
+    <div class="vazio-estoque" data-sem-resultado hidden>
+      <p>Nenhum carro com esses filtros. Não achou o que procura? A gente avisa quando chegar.</p>
+      <a class="btn red sm" href="{{ link_whatsapp(loja.whatsapp, 'Olá, R-CAR! Procuro um carro que não achei no site:') }}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#wa"/></svg>Pedir pelo WhatsApp</a>
+    </div>
+    {% else %}
+    <div class="vazio-estoque">
+      <p>Estamos atualizando o estoque no site. Peça a lista de carros disponíveis hoje pelo WhatsApp.</p>
+      <a class="btn red sm" href="{{ link_whatsapp(loja.whatsapp, 'Olá, R-CAR! Quero ver o estoque.') }}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#wa"/></svg>Pedir a lista</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

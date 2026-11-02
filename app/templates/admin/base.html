@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block titulo %}Painel{% endblock %} · {{ loja.nome_loja }}</title>
+  <link rel="icon" href="/static/img/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,500;0,700;1,700;1,800;1,900&family=Albert+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/static/css/site.css?v=1">
+  <link rel="stylesheet" href="/static/css/admin.css?v=1">
+</head>
+<body>
+  {% set caminho = request.url.path %}
+  <div class="painel">
+    <aside class="painel-lado">
+      <a class="marca" href="/admin"><img src="/static/img/logo.png" alt="{{ loja.nome_loja }}"><span>Painel</span></a>
+      <nav class="painel-nav" aria-label="Painel">
+        <a href="/admin" {% if caminho == '/admin' %}aria-current="page"{% endif %}>Início</a>
+        <a href="/admin/veiculos" {% if caminho.startswith('/admin/veiculos') %}aria-current="page"{% endif %}>Veículos</a>
+        <a href="/admin/configuracoes" {% if caminho.startswith('/admin/configuracoes') %}aria-current="page"{% endif %}>Loja</a>
+      </nav>
+      <div class="rodape-lado">
+        <a href="/" target="_blank" rel="noopener">Ver o site ↗</a>
+        <a href="/admin/conta">Minha senha</a>
+        <form method="post" action="/admin/sair"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit">Sair</button></form>
+      </div>
+    </aside>
+    <main class="painel-principal">
+      {% if aviso %}<p class="aviso" role="status">{{ aviso }}</p>{% endif %}
+      {% block conteudo %}{% endblock %}
+    </main>
+  </div>
+  <script src="/static/js/admin.js?v=1" defer></script>
+</body>
+</html>

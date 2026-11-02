@@ -1,0 +1,10 @@
+{# Troca rápida de situação numa linha da tabela. Com JS envia ao escolher; sem JS, pelo botão. #}
+<form class="troca-situacao" method="post" action="/admin/veiculos/{{ v.id }}/situacao">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="voltar" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}">
+  <label class="sr" for="sit-{{ v.id }}">Situação de {{ v.titulo }}</label>
+  <select class="entrada situacao-{{ v.situacao }}" id="sit-{{ v.id }}" name="situacao" data-enviar-ao-mudar>
+    {% for chave, rotulo in SITUACOES.items() %}<option value="{{ chave }}" {% if v.situacao == chave %}selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+  </select>
+  <noscript><button class="btn line sm" type="submit">Mudar</button></noscript>
+</form>

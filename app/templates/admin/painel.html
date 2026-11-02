@@ -1,0 +1,29 @@
+{% extends "admin/base.html" %}
+{% block titulo %}Início{% endblock %}
+
+{% block conteudo %}
+<div class="painel-cabeca">
+  <h1>Olá, {{ usuario.nome }}</h1>
+  <div class="acoes"><a class="btn red sm" href="/admin/veiculos/novo">+ Cadastrar veículo</a></div>
+</div>
+
+{% if sem_foto %}
+<p class="aviso atencao">{{ sem_foto | length }} veículo{{ 's' if sem_foto | length != 1 }} no site sem foto:
+  {% for v in sem_foto %}<a href="/admin/veiculos/{{ v.id }}#fotos">{{ v.titulo }}</a>{{ ', ' if not loop.last }}{% endfor %}.</p>
+{% endif %}
+
+<div class="resumo">
+  <a href="/admin/veiculos?situacao=disponivel"><span>Disponíveis</span><b>{{ contagem.get('disponivel', 0) }}</b></a>
+  <a href="/admin/veiculos?situacao=reservado"><span>Reservados</span><b>{{ contagem.get('reservado', 0) }}</b></a>
+  <a href="/admin/veiculos?situacao=vendido"><span>Vendidos este mês</span><b>{{ vendidos_mes }}</b></a>
+</div>
+
+<section class="bloco">
+  <h2>No site agora <small><a href="/admin/veiculos">Ver todos</a></small></h2>
+  {% if no_site %}
+  {% set linhas = no_site %}{% include "admin/_tabela.html" %}
+  {% else %}
+  <p class="apagado">Nenhum veículo aparecendo no site. Cadastre o primeiro em “Cadastrar veículo”: enquanto o estoque estiver vazio, o site mostra o botão para pedir a lista pelo WhatsApp.</p>
+  {% endif %}
+</section>
+{% endblock %}

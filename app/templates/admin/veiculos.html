@@ -1,0 +1,29 @@
+{% extends "admin/base.html" %}
+{% block titulo %}Veículos{% endblock %}
+
+{% block conteudo %}
+<div class="painel-cabeca">
+  <h1>Veículos</h1>
+  <div class="acoes"><a class="btn red sm" href="/admin/veiculos/novo">+ Cadastrar veículo</a></div>
+</div>
+
+<section class="bloco">
+  <nav class="filtro-situacao" aria-label="Filtrar por situação">
+    <a href="/admin/veiculos{% if q %}?q={{ q | urlencode }}{% endif %}" {% if not situacao %}aria-current="true"{% endif %}>Todos <span>{{ contagem.values() | sum }}</span></a>
+    {% for chave, rotulo in SITUACOES.items() %}
+    <a href="/admin/veiculos?situacao={{ chave }}{% if q %}&q={{ q | urlencode }}{% endif %}" {% if situacao == chave %}aria-current="true"{% endif %}>{{ rotulo }} <span>{{ contagem.get(chave, 0) }}</span></a>
+    {% endfor %}
+  </nav>
+  <form method="get" class="busca-adm">
+    {% if situacao %}<input type="hidden" name="situacao" value="{{ situacao }}">{% endif %}
+    <label class="sr" for="q">Buscar</label>
+    <input class="entrada" id="q" type="search" name="q" value="{{ q }}" placeholder="Buscar por marca, modelo ou versão">
+    <button class="btn line sm" type="submit">Buscar</button>
+  </form>
+  {% if veiculos %}
+  {% set linhas = veiculos %}{% include "admin/_tabela.html" %}
+  {% else %}
+  <p class="apagado">{% if q %}Nenhum veículo com “{{ q }}”.{% elif situacao %}Nenhum veículo {{ SITUACOES[situacao] | lower }}.{% else %}Nenhum veículo cadastrado ainda. Comece por “Cadastrar veículo”.{% endif %}</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "admin/base.html" %}
+{% block titulo %}{{ veiculo.titulo if veiculo else 'Cadastrar veículo' }}{% endblock %}
+
+{% macro valor(campo, padrao='') -%}{{ dados.get(campo, padrao) if dados else padrao }}{%- endmacro %}
+
+{% block conteudo %}
+{% set v = veiculo %}
+<div class="painel-cabeca">
+  <h1>{{ v.titulo ~ ' ' ~ v.ano if v else 'Cadastrar veículo' }}</h1>
+  <div class="acoes">
+    <a class="btn line sm" href="/admin/veiculos">Voltar</a>
+    {% if v and v.na_loja %}<a class="btn line sm" href="/veiculo/{{ v.slug }}" target="_blank" rel="noopener">Ver no site ↗</a>{% endif %}
+  </div>
+</div>
+
+{% if erro %}<p class="aviso erro" role="alert">{{ erro }}</p>{% endif %}
+{% if v and not v.na_loja %}<p class="aviso atencao">Este veículo não aparece no site ({{ 'vendido' if v.situacao == 'vendido' else 'marcado para não mostrar' }}).</p>{% endif %}
+
+<form class="bloco" method="post" action="{{ '/admin/veiculos/' ~ v.id if v else '/admin/veiculos/novo' }}">
+  <h2>Dados do veículo</h2>
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="form-grade">
+    <label class="campo"><span>Marca</span>
+      <input class="entrada" name="marca" required maxlength="40" list="marcas" value="{{ valor('marca', v.marca if v else '') }}" placeholder="Chevrolet">
+      <datalist id="marcas">{% for m in MARCAS %}<option value="{{ m }}">{% endfor %}</datalist></label>
+    <label class="campo"><span>Modelo</span>
+      <input class="entrada" name="modelo" required maxlength="60" value="{{ valor('modelo', v.modelo if v else '') }}" placeholder="Onix"></label>
+    <label class="campo inteiro"><span>Versão <small>(opcional)</small></span>
+      <input class="entrada" name="versao" maxlength="80" value="{{ valor('versao', v.versao if v else '') }}" placeholder="1.0 Turbo LTZ"></label>
+    <label class="campo"><span>Ano de fabricação</span>
+      <input class="entrada" name="ano_fabricacao" required inputmode="numeric" maxlength="4" value="{{ valor('ano_fabricacao', v.ano_fabricacao if v else '') }}" placeholder="{{ ano_atual - 2 }}"></label>
+    <label class="campo"><span>Ano do modelo</span>
+      <input class="entrada" name="ano_modelo" required inputmode="numeric" maxlength="4" value="{{ valor('ano_modelo', v.ano_modelo if v else '') }}" placeholder="{{ ano_atual - 1 }}"></label>
+    <label class="campo"><span>Quilometragem</span>
+      <input class="entrada" name="km" inputmode="numeric" value="{{ valor('km', v.km | milhar if v and v.km is not none else '') }}" placeholder="45.000"></label>
+    <label class="campo"><span>Preço <small>(vazio = “Consulte o preço”)</small></span>
+      <input class="entrada" name="preco" inputmode="decimal" value="{{ valor('preco', (v.preco | reais)[3:] if v and v.preco else '') }}" placeholder="89.900"></label>
+    <label class="campo"><span>Câmbio</span>
+      <select class="entrada" name="cambio">
+        {% set atual = valor('cambio', v.cambio if v else '') %}
+        <option value="">Não informar</option>
+        {% for c in CAMBIOS %}<option {% if atual == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select></label>
+    <label class="campo"><span>Combustível</span>
+      <select class="entrada" name="combustivel">
+        {% set atual = valor('combustivel', v.combustivel if v else 'Flex') %}
+        <option value="">Não informar</option>
+        {% for c in COMBUSTIVEIS %}<option {% if atual == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select></label>
+    <label class="campo"><span>Cor</span>
+      <input class="entrada" name="cor" maxlength="30" value="{{ valor('cor', v.cor if v else '') }}" placeholder="Branco"></label>
+    <label class="campo"><span>Situação</span>
+      <select class="entrada" name="situacao">
+        {% set atual = valor('situacao', v.situacao if v else 'disponivel') %}
+        {% for chave, rotulo in SITUACOES.items() %}<option value="{{ chave }}" {% if atual == chave %}selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+      </select>
+      <small>Vendido sai do site, mas continua aqui no painel.</small></label>
+    <div class="campo inteiro">
+      <span>No site</span>
+      <label class="marcar"><input type="checkbox" name="ativo" {% if (dados and dados.get('ativo')) or (not dados and (not v or v.ativo)) %}checked{% endif %}> Mostrar no site</label>
+      <label class="marcar"><input type="checkbox" name="destaque" {% if (dados and dados.get('destaque')) or (not dados and v and v.destaque) %}checked{% endif %}> Destaque <small>(aparece primeiro, com selo vermelho)</small></label>
+    </div>
+    <label class="campo"><span>Opcionais <small>(um por linha)</small></span>
+      <textarea class="entrada" name="opcionais" rows="7" placeholder="Ar-condicionado&#10;Direção elétrica&#10;Central multimídia&#10;Câmera de ré">{{ valor('opcionais', v.opcionais if v else '') }}</textarea></label>
+    <label class="campo"><span>Descrição</span>
+      <textarea class="entrada" name="descricao" rows="7" placeholder="Único dono, revisões na concessionária, pneus novos…">{{ valor('descricao', v.descricao if v else '') }}</textarea></label>
+  </div>
+  <p class="rodape-form"><button class="btn red sm" type="submit">{{ 'Salvar dados' if v else 'Cadastrar e enviar fotos' }}</button></p>
+</form>
+
+{% if v %}
+<section class="bloco" id="fotos">
+  <h2>Fotos <small>A primeira é a capa. Fotos deitadas (4:3) ficam melhores.</small></h2>
+  {% if v.fotos %}
+  <div class="fotos-adm">
+    {% for f in v.fotos %}
+    <figure>
+      <img src="/media/{{ f.arquivo }}" alt="Foto {{ loop.index }}" loading="lazy">
+      <figcaption>
+        {% if not loop.first %}
+        <form method="post" action="/admin/veiculos/{{ v.id }}/fotos/{{ f.id }}/capa"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn line sm" type="submit">Usar como capa</button></form>
+        {% else %}<span class="etiqueta destaque">capa</span>{% endif %}
+        <form method="post" action="/admin/veiculos/{{ v.id }}/fotos/{{ f.id }}/apagar" data-confirmar="Apagar esta foto?"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn perigo sm" type="submit">Apagar</button></form>
+      </figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="aviso atencao">Este veículo ainda não tem foto. No site ele aparece com “Foto em breve”.</p>
+  {% endif %}
+  <form class="envio-fotos" method="post" action="/admin/veiculos/{{ v.id }}/fotos" enctype="multipart/form-data">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="sr" for="fotos-arquivo">Escolher fotos</label>
+    <input id="fotos-arquivo" type="file" name="fotos" accept="image/jpeg,image/png,image/webp" multiple required>
+    <button class="btn red sm" type="submit">Enviar fotos</button>
+  </form>
+</section>
+
+<form class="bloco" method="post" action="/admin/veiculos/{{ v.id }}/apagar" data-confirmar="Apagar “{{ v.titulo }}” com todas as fotos? Para tirar do site sem perder o cadastro, marque como vendido.">
+  <h2>Apagar veículo</h2>
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <p class="apagado">Vendeu? Marque como “Vendido”: ele sai do site e entra na conta do mês. Apagar remove o cadastro e as fotos de vez.</p>
+  <button class="btn perigo sm" type="submit">Apagar veículo</button>
+</form>
+{% endif %}
+{% endblock %}

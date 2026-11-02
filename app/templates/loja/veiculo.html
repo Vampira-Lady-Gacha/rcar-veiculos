@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "_macros.html" import carro, preco, selo %}
+
+{% block titulo %}{{ veiculo.titulo }} {{ veiculo.ano }} · {{ loja.nome_loja }}{% endblock %}
+{% block descricao %}{{ veiculo.titulo }} {{ veiculo.ano }}{% if veiculo.km is not none %}, {{ veiculo.km | km }}{% endif %}{% if veiculo.preco %}, {{ veiculo.preco | reais }}{% endif %}. {{ loja.nome_loja }}, {{ loja.cidade }}. Financiamento por 8 bancos.{% endblock %}
+{% block og_imagem %}{% if veiculo.foto_capa %}{{ url_publica }}/media/{{ veiculo.foto_capa.arquivo }}{% else %}{{ url_publica }}/static/img/showroom.jpg{% endif %}{% endblock %}
+
+{% block conteudo %}
+<div class="wrap">
+  <p class="migalha"><a href="/estoque">Estoque</a> / {{ veiculo.nome }}</p>
+  <article class="veiculo">
+    <div class="galeria" data-galeria>
+      <figure class="principal">
+        {% if veiculo.foto_capa %}
+        <img src="/media/{{ veiculo.foto_capa.arquivo }}" alt="{{ veiculo.titulo }} {{ veiculo.ano }}, foto 1 de {{ veiculo.fotos | length }}" width="1200" height="900" fetchpriority="high" data-foto-principal>
+        {% else %}
+        <img src="/static/img/showroom.jpg" alt="Salão da R-CAR" width="344" height="624" style="object-position:50% 38%">
+        {% endif %}
+        {{ selo(veiculo) }}
+      </figure>
+      {% if veiculo.fotos | length > 1 %}
+      <div class="miniaturas" aria-label="Fotos">
+        {% for f in veiculo.fotos %}
+        <button type="button" data-foto="/media/{{ f.arquivo }}" data-alt="{{ veiculo.titulo }} {{ veiculo.ano }}, foto {{ loop.index }} de {{ loop.length }}" {% if loop.first %}aria-current="true"{% endif %} aria-label="Ver foto {{ loop.index }}">
+          <img src="/media/{{ f.arquivo }}" alt="" loading="lazy" width="92" height="69">
+        </button>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="lado">
+      <h1 class="cromo">{{ veiculo.nome }}</h1>
+      {% if veiculo.versao %}<p class="versao">{{ veiculo.versao }}</p>{% endif %}
+      <div class="preco">{{ preco(veiculo) }}</div>
+      <div class="acoes">
+        <a class="btn red" href="{{ url_interesse }}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#wa"/></svg>{{ 'Perguntar se ainda está reservado' if veiculo.situacao == 'reservado' else 'Tenho interesse' }}</a>
+        <a class="btn line" href="{{ url_financiar }}" target="_blank" rel="noopener">Simular financiamento</a>
+      </div>
+      <dl class="ficha">
+        <dt>Ano</dt><dd>{{ veiculo.ano }}</dd>
+        {% if veiculo.km is not none %}<dt>Quilometragem</dt><dd>{{ veiculo.km | km }}</dd>{% endif %}
+        {% if veiculo.cambio %}<dt>Câmbio</dt><dd>{{ veiculo.cambio }}</dd>{% endif %}
+        {% if veiculo.combustivel %}<dt>Combustível</dt><dd>{{ veiculo.combustivel }}</dd>{% endif %}
+        {% if veiculo.cor %}<dt>Cor</dt><dd>{{ veiculo.cor }}</dd>{% endif %}
+        <dt>Situação</dt><dd>{{ SITUACOES[veiculo.situacao] }}</dd>
+      </dl>
+    </div>
+
+    {% if veiculo.descricao or veiculo.lista_opcionais %}
+    <div class="texto-veiculo">
+      {% if veiculo.descricao %}<div><h2 class="cromo">Sobre o carro</h2><p>{{ veiculo.descricao }}</p></div>{% endif %}
+      {% if veiculo.lista_opcionais %}<div><h2 class="cromo">Opcionais</h2><ul class="opcionais">{% for o in veiculo.lista_opcionais %}<li>{{ o }}</li>{% endfor %}</ul></div>{% endif %}
+    </div>
+    {% endif %}
+  </article>
+</div>
+
+{% if outros %}
+<section class="block buy">
+  <div class="wrap">
+    <div class="head"><h2 class="cromo">Outros no salão</h2><p><a href="/estoque">Ver todo o estoque</a></p></div>
+    <div class="carros">{% for v in outros %}{{ carro(v, loop.index0) }}{% endfor %}</div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

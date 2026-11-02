@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ 'Página não encontrada' if erro.status_code == 404 else 'Algo deu errado' }} · {{ loja.nome_loja }}{% endblock %}
+
+{% block conteudo %}
+<div class="wrap erro-pagina">
+  {% if erro.status_code == 404 %}
+  <h1 class="cromo">Esse carro já saiu com laço.</h1>
+  <p>A página não existe mais ou o endereço está errado. O carro pode ter sido vendido.</p>
+  {% else %}
+  <h1 class="cromo">Algo deu errado.</h1>
+  <p>{{ erro.detail }}</p>
+  {% endif %}
+  <a class="btn red" href="/estoque">Ver o estoque</a>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR"{% if estatico %} class="estatico"{% endif %}>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block titulo %}{{ loja.nome_loja }}{% endblock %}</title>
+<meta name="description" content="{% block descricao %}{{ loja.nome_loja }} em {{ loja.cidade }}: 11 anos vendendo carros, financiamento facilitado por 8 bancos e entrega com laço.{% endblock %}">
+<meta property="og:title" content="{{ self.titulo() | trim }}">
+<meta property="og:description" content="{{ self.descricao() | trim }}">
+<meta property="og:image" content="{% block og_imagem %}{{ url_publica }}/static/img/showroom.jpg{% endblock %}">
+<link rel="icon" href="/static/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,500;0,700;1,700;1,800;1,900&family=Albert+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/static/css/site.css?v=1">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6.5-.1 1.5-.6 1.8-1.2.2-.6.2-1.1.1-1.2l-.5-.3z"/></symbol>
+  <symbol id="pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></symbol>
+</svg>
+
+{% set caminho = request.url.path %}
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="/#inicio" aria-label="{{ loja.nome_loja }}, início"><img src="/static/img/logo.png" alt="{{ loja.nome_loja }}"></a>
+    <nav aria-label="Seções">
+      <a href="/estoque" {% if caminho.startswith('/estoque') or caminho.startswith('/veiculo') %}aria-current="page"{% endif %}>Estoque</a>
+      <a class="sec" href="/#entregas">Entregas</a>
+      <a class="sec" href="/#financiamento">Financiamento</a>
+      <a class="sec" href="/#contato">Contato</a>
+      <a class="btn red sm" href="{{ link_whatsapp(loja.whatsapp, 'Olá, R-CAR! Vim pelo site.') }}" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#wa"/></svg>WhatsApp</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+{% block conteudo %}{% endblock %}
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="/static/img/logo.png" alt="{{ loja.nome_loja }}">
+    <span>{{ loja.nome_loja }}, {{ loja.cidade }}. 11 anos vendendo carros.</span>
+  </div>
+</footer>
+<div class="toast" id="toast" hidden></div>
+<script src="/static/js/site.js?v=1" defer></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+# Blueprint do Render. No painel do Render: New > Blueprint > este repositório.
+#
+# Por enquanto no plano GRATUITO, para testar: não há disco persistente, então o banco
+# e as fotos enviadas pelo painel se apagam a cada deploy ou reinício (o estoque volta
+# a ficar vazio), e o serviço dorme após uns 15 minutos sem visitas.
+#
+# Para usar de verdade, troque para o plano pago com disco:
+#   plan: starter
+#   e acrescente, no fim do serviço:
+#     disk:
+#       name: dados
+#       mountPath: /var/data
+#       sizeGB: 1
+#   e a variável LOJA_DADOS=/var/data
+services:
+  - type: web
+    name: rcar-veiculos
+    runtime: python
+    plan: free
+    region: virginia
+    buildCommand: pip install uv && uv sync --frozen --no-dev
+    startCommand: .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips="*"
+    healthCheckPath: /robots.txt
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: SECRET_KEY
+        generateValue: true
+      - key: COOKIE_SEGURO
+        value: "1"
+      # Preenchidos no painel do Render na hora de criar (não ficam no repositório)
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_SENHA
+        sync: false
+      - key: URL_PUBLICA
+        sync: false

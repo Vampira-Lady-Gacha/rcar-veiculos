@@ -1,0 +1,17 @@
+{% extends "admin/base.html" %}
+{% block titulo %}Loja{% endblock %}
+
+{% block conteudo %}
+<div class="painel-cabeca"><h1>Dados da loja</h1></div>
+<form class="bloco estreito" method="post" action="/admin/configuracoes">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <p class="apagado">Aparecem no site e nos botões de WhatsApp dos carros.</p>
+  <div class="pilha">
+    {% for chave, rotulo in rotulos.items() %}
+    <label class="campo"><span>{{ rotulo }}</span>
+      <input class="entrada" name="{{ chave }}" value="{{ loja[chave] }}" {% if chave == 'whatsapp' %}inputmode="tel"{% endif %}></label>
+    {% endfor %}
+  </div>
+  <p class="rodape-form"><button class="btn red sm" type="submit">Salvar</button></p>
+</form>
+{% endblock %}

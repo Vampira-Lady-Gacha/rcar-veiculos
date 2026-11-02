@@ -1,0 +1,40 @@
+{% macro preco(veiculo) -%}
+{% if veiculo.preco %}{{ veiculo.preco | reais }}{% else %}<span class="consulte">Consulte o preço</span>{% endif %}
+{%- endmacro %}
+
+{% macro selo(veiculo) -%}
+{% if veiculo.situacao == 'reservado' %}<span class="selo reservado">Reservado</span>
+{% elif veiculo.destaque %}<span class="selo destaque">Destaque</span>{% endif %}
+{%- endmacro %}
+
+{% macro ficha_curta(veiculo) -%}
+<ul class="ficha-curta">
+  <li>{{ veiculo.ano }}</li>
+  {% if veiculo.km is not none %}<li>{{ veiculo.km | km }}</li>{% endif %}
+  {% if veiculo.cambio %}<li>{{ veiculo.cambio }}</li>{% endif %}
+  {% if veiculo.combustivel %}<li>{{ veiculo.combustivel }}</li>{% endif %}
+</ul>
+{%- endmacro %}
+
+{# Cartão do estoque. Os data-* alimentam o filtro da página de estoque, que roda no navegador
+   para funcionar igual no servidor e na cópia estática do GitHub Pages. #}
+{% macro carro(veiculo, ordem=0, lazy=True) %}
+<a class="carro" href="/veiculo/{{ veiculo.slug }}"
+   data-carro data-marca="{{ veiculo.marca }}" data-cambio="{{ veiculo.cambio }}"
+   data-preco="{{ veiculo.preco or '' }}" data-ano="{{ veiculo.ano_modelo }}" data-km="{{ veiculo.km if veiculo.km is not none else '' }}"
+   data-ordem="{{ ordem }}"
+   data-busca="{{ (veiculo.titulo ~ ' ' ~ veiculo.cor ~ ' ' ~ veiculo.ano) | lower }}">
+  <div class="foto">
+    {% if veiculo.foto_capa %}
+    <img src="/media/{{ veiculo.foto_capa.arquivo }}" alt="{{ veiculo.titulo }} {{ veiculo.ano }}" width="640" height="480" {% if lazy %}loading="lazy"{% endif %} decoding="async">
+    {% else %}<span class="vazia">Foto em breve</span>{% endif %}
+    {{ selo(veiculo) }}
+  </div>
+  <div class="info">
+    <h3>{{ veiculo.nome }}</h3>
+    {% if veiculo.versao %}<p class="versao">{{ veiculo.versao }}</p>{% endif %}
+    {{ ficha_curta(veiculo) }}
+    <div class="preco">{{ preco(veiculo) }}</div>
+  </div>
+</a>
+{% endmacro %}
